@@ -1,0 +1,31 @@
+//서보 모터 제어 pitch와 yaw 각도 제어
+
+#include <Servo.h>
+
+Servo servoPitch;  // 서보 모터 객체 생성 (Pitch)
+Servo servoYaw;    // 서보 모터 객체 생성 (Yaw)
+
+int pitchPin = 9;  // Pitch 서보가 연결된 핀 번호
+int yawPin = 10;   // Yaw 서보가 연결된 핀 번호
+
+void setup() {
+  servoPitch.attach(pitchPin);  // Pitch 서보 핀에 연결
+  servoYaw.attach(yawPin);      // Yaw 서보 핀에 연결
+  
+  Serial.begin(9600);  // 시리얼 통신 시작 (Python과 데이터 전송)
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n');  // Python에서 전송된 명령 읽기
+    
+    if (command.startsWith("P")) {  // Pitch 제어 명령
+      int pitchAngle = command.substring(1).toInt();
+      servoPitch.write(pitchAngle);  // Pitch 각도 설정
+    }
+    else if (command.startsWith("Y")) {  // Yaw 제어 명령
+      int yawAngle = command.substring(1).toInt();
+      servoYaw.write(yawAngle);  // Yaw 각도 설정
+    }
+  }
+}

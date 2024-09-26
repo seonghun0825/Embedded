@@ -1,0 +1,24 @@
+//파이썬 코드 (명령 전송)
+
+import serial
+import time
+
+# Arduino와 시리얼 통신 설정
+arduino = serial.Serial('COM3', 9600)  # COM 포트는 실제 Arduino가 연결된 포트로 변경해야 함
+time.sleep(2)  # 시리얼 연결 대기
+
+def set_pitch(angle):
+    command = f"P{angle}\n"  # Pitch 명령 (P뒤에 각도)
+    arduino.write(command.encode())  # 시리얼로 명령 전송
+
+def set_yaw(angle):
+    command = f"Y{angle}\n"  # Yaw 명령 (Y뒤에 각도)
+    arduino.write(command.encode())  # 시리얼로 명령 전송
+
+# 예제: Pitch를 90도로, Yaw를 45도로 설정
+set_pitch(90)
+time.sleep(1)
+set_yaw(45)
+
+# 시리얼 포트 닫기
+arduino.close()

@@ -1,0 +1,68 @@
+import ollama
+
+# 모델 이름 설정
+model_a = "example"
+model_b = "llama3.1"
+
+# 대화를 종료할 수 있는 조건 목록
+end_phrases = ["이만", "끝", "다음에 또", "여기까지", "대화를 종료합니다", "안녕히", "고맙습니다"]
+
+# 문장의 끝에서 잘라내는 함수
+def limit_to_sentence_end(text, max_length):
+    if len(text) <= max_length:
+        return text
+    
+    # 최대 길이 내에서 문장 끝나는 위치 찾기
+    cut_text = text[:max_length]
+    
+    # 마침표, 느낌표, 물음표 기준으로 문장의 끝 찾기
+    last_punctuation = max(cut_text.rfind('.'), cut_text.rfind('!'), cut_text.rfind('?'))
+    
+    if last_punctuation == -1:  # 끝나는 문장 부호가 없으면 그냥 자른 텍스트 반환
+        return cut_text
+    
+    # 문장 부호까지의 텍스트 반환
+    return cut_text[:last_punctuation+1]
+
+# 대화를 주고받는 함수 (응답을 문장 단위로 제한)
+def ollama_chat(model_a, model_b, initial_prompt, num_turns=5, max_length=100):
+    current_prompt = initial_prompt
+    current_model = model_a
+
+    for turn in range(num_turns):
+        # 종료 조건: 사용자가 '종료'를 입력하면 대화 중단
+        if current_prompt.lower() in ['종료', 'quit', 'exit']:
+            print("대화를 종료합니다.")
+            break
+        
+        # Ollama API를 통해 대화 (한국어로 응답을 유도하기 위해 시스템 메시지 추가)
+        response = ollama.chat(model=current_model, messages=[
+            {'role': 'system', 'content': '대화는 한국어로 진행됩니다.'},  # 시스템 메시지로 한국어 지정
+            {'role': 'user', 'content': current_prompt}
+        ])
+
+        # 응답에서 메시지 내용 추출
+        content = response['message']['content']
+        
+        # 응답을 문장의 끝에서 자르기
+        limited_content = limit_to_sentence_end(content, max_length)
+
+        # 응답 출력 (문장 끝에 맞춰 잘린 내용)
+        print(f"{current_model} says: {limited_content}\n")
+
+        # 종료 조건에 해당하는 문구가 포함되어 있으면 대화를 종료
+        if any(phrase in limited_content for phrase in end_phrases):
+            print(f"자연스러운 끝맺음이 감지되었습니다. 대화를 종료합니다.\n{current_model} says: {limited_content}")
+            break
+
+        # 잘린 응답을 다음 프롬프트로 사용
+        current_prompt = limited_content
+
+        # 모델을 번갈아 가며 대화
+        current_model = model_b if current_model == model_a else model_a
+
+# 시작할 질문
+initial_prompt = input("첫 번째 질문을 입력하세요 (종료하려면 '종료' 입력): ")
+
+# 대화 시작
+ollama_chat(model_a, model_b, initial_prompt)

@@ -42,16 +42,27 @@ conversation_rounds = 5
 for i in range(conversation_rounds):
     print(f"모델 1: {message}")
     # 모델 1의 응답을 모델 2의 입력으로 사용
-    response_1 = model_1.invoke(message+base)
+    response_1 = model_1.invoke(message + base)
     print(f"모델 2: {response_1}")
     
     # 모델 2의 응답을 모델 1의 다음 입력으로 사용
-    response_2 = model_2.invoke(response_1+base1)
+    response_2 = model_2.invoke(response_1 + base1)
     message = response_2  # 모델 1에 전달할 다음 메시지
 
-    response_3 = model_3.invoke(SUM + response_1+" 한명은 이렇게 생각하고"  + response_2 + "한명은 이렇게 생각")
+    # 모델 3의 의견 수렴
+    response_3 = model_3.invoke(SUM + response_1 + " 한명은 이렇게 생각하고 " + response_2 + " 한명은 이렇게 생각")
     print(f"모델 3: {response_3}")
-    response_4 = model_4.invoke(response_3 + "|||| <-앞에문장은 주어진 문장입니다.길게 말하지 마시고. 이 문맥에서 '저사람은 도둑입니다'라고 인정하면 문장안의 내용과 상관없이 문자열 ###감지됨###을 말하세요. ")
+    
+    # 모델 4의 응답 처리
+    response_4 = model_4.invoke(response_3 + "|||| <-앞에문장은 주어진 문장입니다.길게 말하지 마시고. 이 문맥에서 '저사람은 도둑입니다'라고 인정하면 문장안의 내용과 상관없이 문자열 ###감지됨###을 말하세요.")
     print(f"모델 4: {response_4}")
+
+    # '###감지됨###'이 포함된 응답을 처리
+    if '###감지됨###' in response_4:
+        print("경고: 도둑이 감지되었습니다!")
+        # 도둑이 감지된 경우 추가 행동 수행 (예: 알림, 로그 기록 등)
+        break  # 대화를 종료
+
 print("대화 종료")
+
 

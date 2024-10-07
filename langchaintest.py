@@ -51,17 +51,23 @@ SUM = "두 의견을 듣고 두의견을 수렴해보세요" + "기본 전제는
 message = "현재 9시, 지금 방안에 사람이있어!"
 conversation_rounds = 5
 
-# 두 모델이 대화하도록 설정
+# 두 모델이 대화하는 과정에서 각 모델의 역할을 명확하게 구분
 for i in range(conversation_rounds):
-    print(f"모델 1: {message}")
     
-    # 모델 1의 응답을 모델 2의 입력으로 사용
+    # 모델 1이 메시지를 처리하고 응답을 생성
+    print(f"모델 1이 받은 메시지: {message}")
     response_1 = model_1.invoke(message + base)
-    print(f"모델 2: {response_1}")
+    print(f"모델 1의 응답: {response_1}")
     
-    # 모델 2의 응답을 모델 1의 다음 입력으로 사용
+    # 모델 2가 모델 1의 응답을 받아 처리하고 새로운 응답을 생성
+    print(f"모델 2가 모델 1의 응답을 처리 중...")
     response_2 = model_2.invoke(response_1 + base1)
-    message = response_2  # 모델 1에 전달할 다음 메시지
+    print(f"모델 2의 응답: {response_2}")
+    
+    # 모델 2의 응답을 다음 라운드에서 모델 1에게 전달할 메시지로 설정
+    message = response_2
+
+    print("-" * 50)  # 각 라운드를 구분하는 시각적인 구분선
 
     # 모델 3의 의견 수렴
     response_3 = model_3.invoke(SUM + response_1 + " 한명은 이렇게 생각하고 " + response_2 + " 한명은 이렇게 생각")

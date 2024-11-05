@@ -15,8 +15,8 @@ def create_model_chain(model_name, prompt_template):
     return LLMChain(llm=llm, prompt=prompt)
 
 # 모델별 프롬프트 템플릿 정의
-model_1_prompt = "모델 1이 처리할 입력입니다: {input}"
-model_2_prompt = "{input}라고 모델1은 생각하지만 나는 그렇게 생각하지 않아"
+model_1_prompt = "{input}를 학습한다 "
+model_2_prompt = "{input}이 모델이 낸 의견에 대해서 허점을 찾아서 반박한다."
 model_3_prompt = "두 의견을 바탕으로 결론 도출. 전제: @@중요한 목표@@@ {input} 결론은 분명하게, 모호할 경우 부정으로."
 model_4_prompt = "{input} |||| <- 주어진 문장에서 '저 사람은 도둑입니다'를 확인하면 '###감지됨###' 출력."
 
@@ -91,7 +91,7 @@ class WorkerSignals(QObject):
 class ChainWorker(QRunnable):
     def __init__(self, input_text, result_display):
         super().__init__()
-        self.input_text = input_text + json_str
+        self.input_text = input_text+ "<== 앞의 내용은 불특정 누군가의 입력이다. 그리고 이후의 내용은 너가 처리해야할 주인과 관련된 자료이다. 앞의 누군가의 입력과 자료를 비교하고 그사람이 주인과 동일 인물인지 의견을 내라" + json_str
         self.signals = WorkerSignals()
         self.result_display = result_display
 
